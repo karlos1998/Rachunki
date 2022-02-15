@@ -18,17 +18,14 @@ namespace ConsoleApp1
     class Dyspozycja
     {
 
-        public Dictionary<string, object> result;
-
         public Dyspozycja()
         {
 
-            result = Wykonaj();
             
         }
 
 
-        Dictionary<string, object> Wykonaj()
+        public static Dictionary<string, object> WykonajRachunki()
         {
             var timeNow = DateTime.Now;
             string DzisiejszyDzien = timeNow.ToString();
@@ -134,6 +131,159 @@ namespace ConsoleApp1
             }
 
         }
+
+
+        public static Dictionary<string, object> WykonajPoczta (decimal Kwota)
+        {
+            IPodmioty podmioty = Program.sfera.PodajObiektTypu<IPodmioty>();
+            IDyspozycjeBankowe dyspozycje = Program.sfera.PodajObiektTypu<IDyspozycjeBankowe>();
+
+
+            using (IDyspozycjaBankowa dyspozycja = dyspozycje.Utworz())
+            {
+                dyspozycja.Dane.Kwota = Kwota;
+                dyspozycja.Dane.Tytulem = "Wpłata - Utarg";
+
+                Podmiot odbiorca = podmioty.Dane.WszystkieFirmy().Where(f => f.Firma is MojaFirma).First();
+
+                //Podmiot odbiorca = podmioty.Dane.Wszystkie().Where(a => a.Firma is MojaFirma && a.NazwaSkrocona == NazwaKonta).FirstOrDefault();
+                Console.WriteLine("Nazwa odbiorcy dyspozycji: '{0}'", odbiorca.NazwaSkrocona);
+                
+                dyspozycja.UstawOdbiorce(odbiorca);
+                dyspozycja.Dane.DataZlozenia = DateTime.Now;
+
+                string NazwaKonta = Program.config.GetValue("Dyspozycja", "NazwaKonta");
+
+                //var rachunek = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == "Pocztowy Firmowe").FirstOrDefault();
+                var rachunek = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == NazwaKonta).FirstOrDefault();
+
+                dyspozycja.UstawRachunekOdbiorcy(rachunek);
+
+                dyspozycja.Dane.Rodzaj = (byte) 1;
+
+                //dyspozycja.Dane.Rozrachunek =
+
+                dyspozycja.Rozrachunkowa = false;
+
+
+                /*
+                 * TODO : zmiana statusu na wykonana
+                 */
+
+
+                if (dyspozycja.Zapisz())
+                {
+                    IWydruki manager = Program.sfera.PodajObiektTypu<IWydruki>();
+                    using (IWydruk wydruk = manager.Utworz(TypWzorcaWydruku.DBStandard))
+                    {
+                        // wskazanie obiektu do wydruku
+                        wydruk.ObiektDoWydruku = dyspozycja.Dane;
+                        // wykonanie wydruku
+                        wydruk.Drukuj();
+                    }
+
+                    Console.WriteLine("Zapisano, a teraz....");
+
+                    /* KW - Wypłata z kasy */
+                    IOperacjeKasowe mgr = Program.sfera.PodajObiektTypu<IOperacjeKasowe>();
+                    using (var bo = mgr.Utworz())
+                    {
+
+                        /* Rezerwacja numeru */
+                        bo.ZarezerwujNumer();
+
+                        /* Tytuł */
+                        bo.Dane.Tytul = "Przykładowy tytuł";
+
+                        /* Stanowisko */
+                        var SymbolKasy = "KP2";
+                        IStanowiskaKasowe stanowiskaKasowe = Program.sfera.PodajObiektTypu<IStanowiskaKasowe>();
+
+                        var ZnajdzStanowisko = stanowiskaKasowe.Dane.Wszystkie().Where(s => s.Symbol == SymbolKasy);
+                        if (ZnajdzStanowisko.Count() == 0)
+                        {
+                            Console.WriteLine("Nie znaleziono kasy z symbolem: " + SymbolKasy);
+                            return new Dictionary<string, object>() { { "ok", false }, { "err", "Nie znaleziono stanowiska kasowego" } };
+                        }
+                        StanowiskoKasowe stanowiskoKasowe = ZnajdzStanowisko.FirstOrDefault();
+
+                        bo.Dane.Stanowisko = stanowiskoKasowe;
+
+                        /* Kwota */
+                        bo.Dane.Kwota = Kwota;
+
+                        /* Rodzaje operacji kasowych */
+                        IRodzajeOperacjiKasowych rodzaje = Program.sfera.PodajObiektTypu<IRodzajeOperacjiKasowych>();
+                        bo.Dane.Rodzaj = rodzaje.Dane.Wszystkie().Where(s => s.Nazwa == "Transfer").FirstOrDefault();
+
+                        /* Cel Transferu */
+                        bo.Dane.TypCGFTransferu = (byte)TypCGFTransferu.Rachunek;
+
+                        /* Rachunek */
+                        //IRachunkiBankowe m = Program.sfera.PodajObiektTypu<IRachunkiBankowe>();
+                        //var konto = m.Dane.Wszystkie().Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == "Pocztowy Firmowe").FirstOrDefault();
+                        //bo.Dane.ElementTransferu.Centrum = konto;
+
+
+                        bo.Dane.ElementTransferu.Centrum = rachunek;
+
+                        
+
+
+                        if (bo.Zapisz())
+                        {
+                            Console.WriteLine("Krok 3");
+                            IOperacjeBankowe mgrr = Program.sfera.PodajObiektTypu<IOperacjeBankowe>();
+                            using (var boo = mgrr.Utworz())
+                            {
+                                IRodzajeOperacjiBankowych rodzajeOB = Program.sfera.PodajObiektTypu<IRodzajeOperacjiBankowych>();
+                                boo.Dane.RodzajOperacji = rodzajeOB.Dane.Wszystkie().Where(s => s.Nazwa == "Transfer").FirstOrDefault();
+
+                                boo.Dane.Kwota = Kwota;
+
+                                boo.Dane.Rachunek = rachunek;
+
+                                boo.Dane.TypCGFTransferu = (byte)TypCGFTransferu.Kasa;
+
+                                //boo.PolaczZ(dyspozycja.Dane);
+
+                                boo.Dane.Wplyw = true;
+
+                                boo.Dane.ElementTransferu.Centrum = stanowiskoKasowe;
+
+
+                                if (!boo.Zapisz())
+                                {
+                                    boo.WypiszBledy();
+                                    return new Dictionary<string, object>() { { "ok", false }, { "err", "Nie udało się zapisać dyspozycji (3)" } };
+                                }
+
+                            }
+
+                        }
+                        else
+                        {
+                            bo.WypiszBledy();
+                        }
+                    }
+
+
+
+
+
+                    return new Dictionary<string, object>() { { "ok", true } };
+                }
+                else
+                {
+                    dyspozycja.WypiszBledy();
+                    return new Dictionary<string, object>() { { "ok", false }, { "err", "Nie udało się zapisać dyspozycji (2)" } };
+                }
+
+                
+
+            }
+        }
+
 
     }
 }
