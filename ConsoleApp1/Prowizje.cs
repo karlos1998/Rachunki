@@ -56,7 +56,7 @@ namespace ConsoleApp1
 
             switch (RodzajRachunku)
             {
-                case "ZWYKLY" : return OplataKnf + PobierzCene("prowizjaKlientaZwykly");
+                case "ZWYKLY" : return OplataKnf + (KwotaRachunku <= PobierzCene("kwotaKNF") ? PobierzCene("prowizjaKlientaZwykly") : PobierzCene("prowizjaKlientaZwyklyPowyzejKNF")) ;
                 case "ZUS"    :
                 case "US"     : return OplataKnf + PobierzCene("prowizjaKlientaZusUs");
             }

@@ -70,9 +70,9 @@ namespace ConsoleApp1
 
             express = getVal("EXPRESS") == "ON";
 
-            ProwizjaAgenta = ObliczProwizjeAgenta();
+            ProwizjaAgenta = ObliczProwizjeAgenta(); //2.19
 
-            ProwizjaKlienta = ObliczProwizjeKlienta();
+            ProwizjaKlienta = ObliczProwizjeKlienta(); // 0.14 + 2.59 
 
             Console.WriteLine("Rodzaj Rachunku: " + RodzajRachunku );
 
@@ -83,7 +83,7 @@ namespace ConsoleApp1
 
             //prowizjaBP = Math.Floor((ProwizjaKlienta - ProwizjaAgenta) * 100) / 100;
             //prowizjaBP = Math.Floor( (ProwizjaKlienta * 100) - (ProwizjaAgenta * 100) ) / 100;
-            prowizjaBP = Math.Ceiling(Math.Round(ProwizjaKlienta * 100 - ProwizjaAgenta * 100, 2)) / 100;
+            prowizjaBP = Math.Ceiling(Math.Round(ProwizjaKlienta * 100 - ProwizjaAgenta * 100, 2)) / 100; // 2.74 - 2.19 = 0.55
             Console.WriteLine("Prowizja BluePay: " + prowizjaBP);
 
             var ListaOperacji = new List<WplataDoKasy.Operacja>() {

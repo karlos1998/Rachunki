@@ -83,7 +83,7 @@ namespace ConsoleApp1
 
             
 
-            Console.Write("[UPDATE 02.09.2020 09:04] Uruchamianie Sfery ({0})", config.GetValue("Sfera", "desktop"));
+            Console.Write("[UPDATE 03.11.2021 9:00 (37.1.0)] Uruchamianie Sfery ({0})", config.GetValue("Sfera", "desktop"));
             DanePolaczenia danePolaczenia;
 
             if (config.GetValue("Sfera", "autentykacjaWindowsLogin") != null && config.GetValue("Sfera", "autentykacjaWindowsLogin") != "" && config.GetValue("Sfera", "autentykacjaWindowsHaslo") != null && config.GetValue("Sfera", "autentykacjaWindowsLogin") != "")
@@ -161,6 +161,36 @@ namespace ConsoleApp1
 
                     while (true) ;
                 }
+
+
+
+                /*InsERT.Moria.Rozrachunki.IRozrachunki mgrrr = sfera.PodajObiektTypu<InsERT.Moria.Rozrachunki.IRozrachunki>();
+                var encje = mgrrr.Dane.Wszystkie();
+
+                foreach(var encja in encje)
+                {
+                    Console.WriteLine(encja.Tytul);
+                };
+
+                while (true) ;*/
+
+                //InsERT.Moria.Bank.IRachunkiBankowe m = sfera.PodajObiektTypu<InsERT.Moria.Bank.IRachunkiBankowe>();
+                //var encje = m.Dane.Wszystkie();
+                //foreach(var encja in encje) if(encja.Wlasciciel.JestMojaFirma()) Console.WriteLine("{0} ----> {1}", encja.Nazwa, encja.Numer);
+                //while (true) ;
+
+
+                /*
+                IRodzajeOperacjiKasowych rodzaje = Program.sfera.PodajObiektTypu<IRodzajeOperacjiKasowych>();
+                var encje = rodzaje.Dane.Wszystkie();
+                foreach(var a in encje)
+                {
+                    Console.Write("Rodzaj opracji kasowej: ");
+                    Console.WriteLine(a.Nazwa);
+                }
+                while (true) ;
+                */
+
 
                 Console.WriteLine("Sprwadzam formy płatności: ");
                 IFormyPlatnosci mgr = sfera.PodajObiektTypu<IFormyPlatnosci>();
@@ -736,8 +766,8 @@ namespace ConsoleApp1
                 }
                 else if (query.ContainsKey("utworzDyspozycjeBankowa"))
                 {
-                    var dysp = new Dyspozycja();
-                    return JsonConvert.SerializeObject(dysp.result);
+                    //var dysp = new Dyspozycja();
+                    return JsonConvert.SerializeObject(Dyspozycja.WykonajRachunki());
                 }
                 else if (query.ContainsKey("PrzyjmijPaczke"))
                 {
@@ -797,6 +827,24 @@ namespace ConsoleApp1
                     Console.WriteLine(query["FiltrujRachunki"]);
                     return SzukajRachunku(Encoding.UTF8.GetString(Convert.FromBase64String(query["FiltrujRachunki"])));
                 }
+                else if (query.ContainsKey("utworzDyspozycjePoczta"))
+                {
+                    Console.WriteLine("Tworzenie dyspozycji pocztowej");
+                    return JsonConvert.SerializeObject(Dyspozycja.WykonajPoczta( Decimal.Parse(query["utworzDyspozycjePoczta"]) ));
+                }
+                else if (query.ContainsKey("kwotaDyspozycjiPocztowej"))
+                {
+                    IStanowiskaKasowe stanowiskaKasowe = Program.sfera.PodajObiektTypu<IStanowiskaKasowe>();
+                    var ZnajdzStanowisko = stanowiskaKasowe.Dane.Wszystkie().Where(s => s.Symbol == "KP2").FirstOrDefault();
+
+                    //var operacje = sfera.PodajObiektTypu<IOperacjeKasowe>().Dane.Wszystkie().Where(a => a.Stanowisko.Symbol == ZnajdzStanowisko.Symbol && a.Data == DateTime.Today && a.Wplyw);
+
+                    var operacje = sfera.PodajObiektTypu<IOperacjeKasowe>().Dane.Wszystkie().Where(a => a.Stanowisko.Symbol == ZnajdzStanowisko.Symbol);
+                    //decimal sum = 0;
+                    //foreach(var op in operacje) sum += op.Kwota;
+                    decimal sum = operacje.Select(a => (a.Wplyw ? 1 : -1) * a.Kwota).ToArray().Sum();
+                    return JsonConvert.SerializeObject(new Dictionary<string, object>() { { "kwota", sum } });
+                }
                 else
                 {
 
@@ -804,10 +852,11 @@ namespace ConsoleApp1
                     var json = new Dictionary<string, object>(){
                         //{ "podmioty", SQL.prepare(SQLSelectPodmiotyString) },
                         //{ "podmiotyNotatki", SQL.prepare(SQLSelectNotatki) },
-                        { "rachunkiBankowe", RachunkiBankowe},
+                        { "rachunkiBankowe", RachunkiBankowe },
                         { "query", query },
                         { "podmioty",  ListaPodmiotow }
                     };
+
                     Console.WriteLine("Kończę pobieranie");
 
                     return JsonConvert.SerializeObject(json);
