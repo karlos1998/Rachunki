@@ -1,32 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Windows.Forms;
-using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.IO;
-
-using InsERT.Moria;
-using InsERT.Moria.Sfera;
-using System.Diagnostics;
-using InsERT.Mox.DatabaseAccess;
-using System.Data.Common;
-using InsERT.Moria.Asortymenty;
-using InsERT.Moria.ModelDanych;
-using InsERT.Moria.Klienci;
-using InsERT.Moria.Kasa;
-using InsERT.Moria.Dokumenty.Logistyka;
-using InsERT.Moria.ModelOrganizacyjny;
-using InsERT.Moria.Wydruki;
-using InsERT.Moria.Wydruki.Enums;
-using InsERT.Mox.Validation;
-using InsERT.Moria.Urzadzenia;
-using InsERT.Moria.Rozszerzanie;
-
 
 namespace ConsoleApp1
 {

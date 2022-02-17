@@ -83,7 +83,7 @@ namespace ConsoleApp1
 
             
 
-            Console.Write("[UPDATE 03.11.2021 9:00 (37.1.0)] Uruchamianie Sfery ({0})", config.GetValue("Sfera", "desktop"));
+            Console.Write("[UPDATE 16.02.2022 16:48 (V nieznana)] Uruchamianie Sfery ({0})", config.GetValue("Sfera", "desktop"));
             DanePolaczenia danePolaczenia;
 
             if (config.GetValue("Sfera", "autentykacjaWindowsLogin") != null && config.GetValue("Sfera", "autentykacjaWindowsLogin") != "" && config.GetValue("Sfera", "autentykacjaWindowsHaslo") != null && config.GetValue("Sfera", "autentykacjaWindowsLogin") != "")

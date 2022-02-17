@@ -211,12 +211,14 @@ namespace ConsoleApp1
             InsERT.Moria.Urzadzenia.Core.IUrzadzeniaZewnetrzne mgr = Program.sfera.PodajObiektTypu<InsERT.Moria.Urzadzenia.Core.IUrzadzeniaZewnetrzne>();
             var encje = mgr.Dane.Wszystkie();
 
-            /*foreach (var encja in encje)
-            {
-                Console.WriteLine(encja.Id + " - " + encja.Nazwa + " - " + encja.StanowiskoKasowe.Symbol);
-            }*/
+            Console.WriteLine("Urządzenia zewnętrzne");
 
-            var kasaSymbol = Program.config.GetValue("Kasa", "symbol");
+            foreach (var encja in encje)
+            {
+                Console.WriteLine("UZ ->" + encja.Id + " - " + encja.Nazwa + " - " + encja.StanowiskoKasowe.Symbol);
+            }
+
+            var kasaSymbol = Program.config.GetValue("Kasa", "symbolKasyFiskalnej");
 
             Console.Write("Ustalanie id kasy fiskalnej dla stanowiska kasowego '{0}' - ", kasaSymbol);
 
