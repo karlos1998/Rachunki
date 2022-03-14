@@ -40,7 +40,8 @@ namespace ConsoleApp1
 
             var SymbolKasy = Program.config.GetValue("Kasa", "symbol");
 
-            var ZnajdzStanowisko = stanowiskaKasowe.Dane.Wszystkie().Where(s => s.Symbol == SymbolKasy);
+            var ZnajdzStanowisko = stanowiskaKasowe.Dane.Wszystkie().Where(s => s.Symbol == 
+            );
             if (ZnajdzStanowisko.Count() == 0)
             {
                 Console.WriteLine("Nie znaleziono kasy z symbolem: " + SymbolKasy);

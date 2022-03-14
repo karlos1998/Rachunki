@@ -152,7 +152,7 @@ namespace ConsoleApp1
                 dyspozycja.UstawOdbiorce(odbiorca);
                 dyspozycja.Dane.DataZlozenia = DateTime.Now;
 
-                string NazwaKonta = Program.config.GetValue("Dyspozycja", "NazwaKonta");
+                string NazwaKonta = Program.config.GetValue("Dyspozycja", "nazwaKontaRor");
 
                 //var rachunek = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == "Pocztowy Firmowe").FirstOrDefault();
                 var rachunek = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == NazwaKonta).FirstOrDefault();
@@ -196,7 +196,8 @@ namespace ConsoleApp1
                         bo.Dane.Tytul = "Przykładowy tytuł";
 
                         /* Stanowisko */
-                        var SymbolKasy = "KP2";
+                        
+                        var SymbolKasy = Program.config.GetValue("Dyspozycja", "symbolKasyPrzejsciowej");
                         IStanowiskaKasowe stanowiskaKasowe = Program.sfera.PodajObiektTypu<IStanowiskaKasowe>();
 
                         var ZnajdzStanowisko = stanowiskaKasowe.Dane.Wszystkie().Where(s => s.Symbol == SymbolKasy);
@@ -224,6 +225,9 @@ namespace ConsoleApp1
                         //var konto = m.Dane.Wszystkie().Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == "Pocztowy Firmowe").FirstOrDefault();
                         //bo.Dane.ElementTransferu.Centrum = konto;
 
+
+                        string NazwaKontaFirmowe = Program.config.GetValue("Dyspozycja", "nazwaKontaFirmowe");
+                        var rachunekFirmowy = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == NazwaKontaFirmowe).FirstOrDefault();
 
                         bo.Dane.ElementTransferu.Centrum = rachunek;
 
