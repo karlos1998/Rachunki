@@ -229,7 +229,7 @@ namespace ConsoleApp1
                         string NazwaKontaFirmowe = Program.config.GetValue("Dyspozycja", "nazwaKontaFirmowe");
                         var rachunekFirmowy = odbiorca.Rachunki.Where(a => a.Wlasciciel.JestMojaFirma() && a.Nazwa == NazwaKontaFirmowe).FirstOrDefault();
 
-                        bo.Dane.ElementTransferu.Centrum = rachunek;
+                        bo.Dane.ElementTransferu.Centrum = rachunekFirmowy;
 
                         
 
@@ -245,7 +245,7 @@ namespace ConsoleApp1
 
                                 boo.Dane.Kwota = Kwota;
 
-                                boo.Dane.Rachunek = rachunek;
+                                boo.Dane.Rachunek = rachunekFirmowy;
 
                                 boo.Dane.TypCGFTransferu = (byte)TypCGFTransferu.Kasa;
 
